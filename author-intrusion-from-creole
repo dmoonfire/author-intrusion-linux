@@ -1,0 +1,68 @@
+#!/usr/bin/perl
+
+# USAGE: author-intrusion-from-creole Content.xml *.txt
+
+#
+# Setup
+#
+
+# Directives
+use strict;
+use warnings;
+
+#
+# Process the input
+#
+
+# Get the output file and insert the boilerplate. We use \r\n because
+# the normal output is Windows-based and we want to keep as much as
+# possible identically (though System.Xml can easily handle Unix-style
+# EOL).
+my $OUTPUT_FILENAME = shift @ARGV;
+
+open OUTPUT, ">$OUTPUT_FILENAME"
+	or die "Cannot open $OUTPUT_FILENAME ($!)";
+
+print OUTPUT join(
+	"\r\n",
+	"<?xml version=\"1.0\" encoding=\"utf-8\" standalone=\"yes\"?>",
+	"<content xmlns=\"urn:mfgames.com/author-intrusion/project/0\">",
+	"\t<version>1</version>"), "\r\n";
+
+# Go through the remaining files.
+foreach my $filename (@ARGV)
+{
+	# Go through the input file.
+	print STDERR "Processing $filename...\n";
+
+	open INPUT, "<$filename"
+		or die "Cannot open chapter $filename ($!)";
+
+	while (<INPUT>)
+	{
+		# Ignore blank lines.
+		chomp;
+		next if /^\s*$/;
+
+		# Figure out our block type, which defaults to Paragraph
+		# unless we see something that changes it to Chapter.
+		my $type = "Paragraph";
+		$type = "Chapter" if s@^= @@;
+
+		# Write out the block.
+		print OUTPUT join(
+			"\r\n",
+			"\t<block>",
+			"\t\t<type>$type</type>",
+			"\t\t<text>$_</text>",
+			"\t\t<text-hash>FFFFFFFF</text-hash>",
+			"\t</block>"), "\r\n";
+	}
+
+	close INPUT;
+}
+
+# Finish up the content and close it. We don't have a trailing newline
+# with the default file.
+print OUTPUT "</content>";
+close OUTPUT;

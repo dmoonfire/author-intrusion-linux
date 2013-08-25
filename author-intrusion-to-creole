@@ -1,0 +1,36 @@
+#!/bin/bash
+
+# USAGE: path/to/Content.xml path/to/output/directory/
+
+#
+# Check input variables
+#
+
+CONTENT=$1
+OUTPUT=$2
+
+if [ ! -f $CONTENT -o ! -d $OUTPUT ]
+then
+	echo "USAGE: path/to/Content.xml path/to/output/directory"
+	exit 1
+fi
+
+#
+# Reformat it using a bunch of obscure stream commands.
+#
+
+echo "Reading $CONTENT and sending to $OUTPUT..."
+
+cat $CONTENT \
+	| grep -A1 '<type>' \
+	| grep -v -- '--' \
+	| awk '{key=$0; getline; print key $0;}' \
+	| perl -npe 's@^.*<type>(.*)</type>.*<text>(.*)</text>.*$@$1\t$2@' \
+	| perl -npe 's@Chapter\t(.*)$@= $1@' \
+	| perl -npe 's@Paragraph\t(.*)$@\n$1@' \
+	| csplit -f "$OUTPUT/chapter-" -b "%02d.txt" - '/^=.*$/' '{*}'
+rm -f $OUTPUT/chapter-00.txt
+
+#	> $OUTPUT/content.txt
+
+#	| awk '{key=$0; getline; print key ", " $0;}'
