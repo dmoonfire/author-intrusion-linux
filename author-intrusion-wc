@@ -62,6 +62,9 @@ printf("%$longest" . "s %6s\n", "Total", $total);
 sub fmt_comma
 {
 	my $in = shift @_;
+
+	return "0" if !defined $in || $in eq "";
+
 	my $buffer = "";
 
 	while ($in =~ s@(\d)(\d\d\d)$@$1@)
