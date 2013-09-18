@@ -1,0 +1,80 @@
+#!/usr/bin/perl
+
+#
+# Setup
+#
+
+# Directives
+use strict;
+use warnings;
+
+#
+# Go through the input
+#
+
+my $type = "Unknown";
+my $longest = 0;
+my %counts = ();
+my @order = ();
+my $total = 0;
+
+while (<>)
+{
+	# Clean up the line.
+	chomp;
+
+	# If we have a <type>, then use it for the count.
+	if (m@<type>(.*?)</type>@)
+	{
+		$type = $1;
+
+		if (length($type) > $longest)
+		{
+			$longest = length($type);
+		}
+
+		if (!defined $counts{$type})
+		{
+			push @order, $type;
+		}
+	}
+
+	# If we have a <text>, then count the words.
+	if (m@<text>(.*?)</text>@)
+	{
+		my $count = split(/\s+/, $1);
+		$counts{$type} += $count;
+		$total += $count;
+	}
+}
+
+# List all the counts we found.
+for my $key (@order)
+{
+	my $count = $counts{$key};
+	my $fmt = fmt_comma($count);
+
+	printf("%$longest" . "s %6s\n", $key, $fmt);
+}
+
+printf("%$longest" . "s %6s\n", "Total", $total);
+
+sub fmt_comma
+{
+	my $in = shift @_;
+	my $buffer = "";
+
+	while ($in =~ s@(\d)(\d\d\d)$@$1@)
+	{
+		$buffer = "$2,$buffer";
+	}
+
+	if ($in ne "")
+	{
+		$buffer = "$in,$buffer";
+	}
+
+	$buffer =~ s@,$@@;
+
+	return $buffer;
+}
