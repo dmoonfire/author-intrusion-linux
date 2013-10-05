@@ -54,10 +54,10 @@ for my $key (@order)
 	my $count = $counts{$key};
 	my $fmt = fmt_comma($count);
 
-	printf("%$longest" . "s %6s\n", $key, $fmt);
+	printf("%$longest" . "s %7s\n", $key, $fmt);
 }
 
-printf("%$longest" . "s %6s\n", "Total", $total);
+printf("%$longest" . "s %7s\n", "Total", fmt_comma($total));
 
 sub fmt_comma
 {

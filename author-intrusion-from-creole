@@ -14,6 +14,13 @@ use warnings;
 # Process the input
 #
 
+# Make sure we have the proper parameters.
+if (!defined $ARGV[1])
+{
+	print STDERR "USAGE: $0 path/to/Content.xml *.txt\n";
+	exit;
+}
+
 # Get the output file and insert the boilerplate. We use \r\n because
 # the normal output is Windows-based and we want to keep as much as
 # possible identically (though System.Xml can easily handle Unix-style
